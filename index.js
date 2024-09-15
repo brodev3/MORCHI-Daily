@@ -2,6 +2,7 @@ const Wallet = require('./scr/wallet');
 const MorchiGame = require('./scr/MorchiGame');
 const utils = require('./scr/utils/utils');
 const log = require('./scr/utils/logger');
+const levelsTab = require('./levels.json');
 
 const gameContract = new MorchiGame();
 
@@ -36,9 +37,18 @@ const collect = async (wallet) => {
 
         result.levelUp = await gameContract.canLevelUp(wallet);
         if (result.levelUp) {
-            let res = await gameContract.levelUp(wallet);
-            log.success(`Wallet: ${wallet.address}. Level up!`);
-            await randomDelay(5000, 7500); 
+            const stats = await gameContract.getStats(wallet);
+            const level = stats.level;
+            const pointsBalance = stats.pointsBalance;
+            const levelUpPrice = levelsTab[level];
+
+            if (levelUpPrice < Number(pointsBalance)){
+                let res = await gameContract.levelUp(wallet);
+                log.success(`Wallet: ${wallet.address}. Level up!`);
+                await randomDelay(5000, 7500); 
+            }
+            else 
+                log.error(`Wallet: ${wallet.address}. Don't enough points`);
         };
 
         const stats = await gameContract.getStats(wallet);
