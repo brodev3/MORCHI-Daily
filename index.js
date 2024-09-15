@@ -43,7 +43,7 @@ const collect = async (wallet) => {
             const pointsBalance = formatUnits(stats.pointsBalance);
             const levelUpPrice = levelsTab[+level + 1];
 
-            if (levelUpPrice < Number(pointsBalance)){
+            if (levelUpPrice <= Number(pointsBalance)){
                 let res = await gameContract.levelUp(wallet);
                 log.success(`Wallet: ${wallet.address}. Level up!`);
                 await randomDelay(5000, 7500); 
