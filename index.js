@@ -39,9 +39,9 @@ const collect = async (wallet) => {
         result.levelUp = await gameContract.canLevelUp(wallet);
         if (result.levelUp) {
             const stats = await gameContract.getStats(wallet);
-            const level = stats.level;
+            const level = stats.level.toString();
             const pointsBalance = formatUnits(stats.pointsBalance);
-            const levelUpPrice = levelsTab[level.toString()];
+            const levelUpPrice = levelsTab[+level + 1];
 
             if (levelUpPrice < Number(pointsBalance)){
                 let res = await gameContract.levelUp(wallet);
@@ -54,7 +54,7 @@ const collect = async (wallet) => {
 
         const stats = await gameContract.getStats(wallet);
         const level = stats.level;
-        const pointsBalance = stats.pointsBalance
+        const pointsBalance = formatUnits(stats.pointsBalance);
 
         log.success(`Wallet: ${wallet.address}. Daily collected! Total points: ${pointsBalance.toString()}. Level: ${level.toString()}`);
         await randomDelay(2000, 6000);

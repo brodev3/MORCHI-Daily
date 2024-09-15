@@ -88,7 +88,7 @@ class MorchiGame {
             const tx = await wallet.gameContract.grindAtTheGym(wallet.token_id);
             await tx.wait();
             return tx;
-        } catch (error) {
+        } catch (err) {
             log.err(
                 `MorchiGame Contract, call grindAtTheGym. Error message: ${err.message}\nStack: ${err.stack}
                 Transaction: ${err.transaction}\nTransactionHash: ${err.transactionHash}\nTransactionHash: ${err.receipt}`
