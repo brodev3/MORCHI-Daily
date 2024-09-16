@@ -49,7 +49,7 @@ const collect = async (wallet) => {
                 await randomDelay(5000, 7500); 
             }
             else 
-                log.error(`Wallet: ${wallet.address}. Don't enough points`);
+                log.debug(`Wallet: ${wallet.address}. Don't enough points`);
         };
 
         const stats = await gameContract.getStats(wallet);

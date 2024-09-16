@@ -89,7 +89,7 @@ class MorchiGame {
             await tx.wait();
             return tx;
         } catch (err) {
-            log.err(
+            log.error(
                 `MorchiGame Contract, call grindAtTheGym. Error message: ${err.message}\nStack: ${err.stack}
                 Transaction: ${err.transaction}\nTransactionHash: ${err.transactionHash}\nTransactionHash: ${err.receipt}`
             );
