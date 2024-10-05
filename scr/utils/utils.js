@@ -42,6 +42,28 @@ async function readDecryptCSVToArray() {
   });
 };
 
+async function readCSVToArray() {
+  return new Promise((resolve, reject) => {
+    const rows = [];
+
+    fs.createReadStream(inputFilePath)
+      .pipe(csv())
+      .on('data', (row) => {
+        rows.push(row);
+      })
+      .on('end', () => {
+        console.log('File reading success.');
+        const result = rows.map(row => {
+          return Object.values(row).join(','); 
+        });
+        resolve(result);
+      })
+      .on('error', (error) => {
+        reject(error);
+      });
+  });
+};
+
 const timeToNextDay = () => {
     const nowUTC = new Date(Date.UTC(
         new Date().getUTCFullYear(),
@@ -66,3 +88,4 @@ const timeToNextDay = () => {
 
 module.exports.readDecryptCSVToArray = readDecryptCSVToArray;
 module.exports.timeToNextDay = timeToNextDay;
+module.exports.readCSVToArray = readCSVToArray;

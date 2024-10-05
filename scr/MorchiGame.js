@@ -5,6 +5,19 @@ class MorchiGame {
     constructor() { 
     };
 
+    async verifyNFTownership(wallet) { 
+        try {
+            const owner = await wallet.NFTContract.ownerOf(wallet.token_id);
+            if (wallet.address === owner)
+                return true;
+            else 
+                return false;
+        } catch (err) {
+            log.error(`MorchiGame Contract, call getStats. Error message: ${err.message}\nStack: ${err.stack}`);
+            return null;
+        };
+    };
+
     async getStats(wallet) {
         try {
             const canDrink = await wallet.gameContract.morchiStates(wallet.token_id);
@@ -105,6 +118,20 @@ class MorchiGame {
         } catch (err) {
             log.error(
                 `MorchiGame Contract, call levelUp. Error message: ${err.message}\nStack: ${err.stack}
+                Transaction: ${err.transaction}\nTransactionHash: ${err.transactionHash}\nTransactionHash: ${err.receipt}`
+            );
+            return null;
+        };
+    };
+
+    async withdrawPointsToSUT(wallet, points) {
+        try {
+            const tx = await wallet.gameContract.withdrawPointsToSUT(wallet.token_id, points);
+            await tx.wait();
+            return tx;
+        } catch (err) {
+            log.error(
+                `MorchiGame Contract, call withdrawPointsToSUT. Error message: ${err.message}\nStack: ${err.stack}
                 Transaction: ${err.transaction}\nTransactionHash: ${err.transactionHash}\nTransactionHash: ${err.receipt}`
             );
             return null;

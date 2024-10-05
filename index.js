@@ -3,16 +3,89 @@ const MorchiGame = require('./scr/MorchiGame');
 const utils = require('./scr/utils/utils');
 const log = require('./scr/utils/logger');
 const levelsTab = require('./scr/levels.json');
-const { ethers, formatUnits } = require('ethers');
+const { ethers, formatUnits, parseUnits } = require('ethers');
 
 const gameContract = new MorchiGame();
+const MAX_UINT256 = BigInt("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
 
 function randomDelay(min, max) {
     return new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * (max - min + 1)) + min));
 };
 
+const transferUSDT = async (wallet) => {
+    try {
+        const balance = await wallet.USDTContract.balanceOf(wallet.address);
+    
+        const transferTx = await wallet.USDTContract.transfer(wallet.withdrawAddress, balance);
+        await transferTx.wait();
+
+        const wei = parseUnits(balance.toString(), "szabo");
+        log.success(`Wallet: ${wallet.address}. Transfered ${formatUnits(wei)} USDT to ${wallet.withdrawAddress}!`);
+        return true;
+    } catch (error) {
+        log.error(`Wallet: ${wallet.address}. transferUSDT. Error message: ${err.message}\nStack: ${err.stack}`);
+        return null;
+    };
+};
+
+const sellSUT = async (wallet) => {
+    try {
+        const balance = await wallet.SUTContract.balanceOf(wallet.address);
+        const allowance = await wallet.SUTContract.allowance(wallet.address, process.env.ROUTERCONTRACT);
+
+        if (allowance.toString() !== MAX_UINT256.toString()) {
+            const approveTx = await wallet.SUTContract.approve(process.env.ROUTERCONTRACT, MAX_UINT256);
+            await approveTx.wait();
+        };
+    
+        const path = [process.env.SUTCONTRACT, process.env.GMTCONTRACT, process.env.USDTCONTRACT];
+    
+        const deadline = Math.floor(Date.now() / 1000) + 60 * 20;
+        const amountsOut = await wallet.routerContract.getAmountsOut(balance, path);
+        const amountOutEstimated = amountsOut[2];
+    
+        const amountOutMin = amountOutEstimated / 100n * 93n;
+    
+        const swapTx = await wallet.routerContract.swapExactTokensForTokens(
+            balance,
+            amountOutMin,
+            path,
+            wallet.address,
+            deadline
+        );
+    
+        await swapTx.wait();
+        log.success(`Wallet: ${wallet.address}. Swaped ${formatUnits(balance)} SUT to USDT!`);
+        return true;
+    } catch (error) {
+        log.error(`Wallet: ${wallet.address}. sellSUT. Error message: ${err.message}\nStack: ${err.stack}`);
+        return null;
+    };
+};
+
+const withdrawSUT = async (wallet) => {
+    const stats = await gameContract.getStats(wallet);
+    const pointsBalance = formatUnits(stats.pointsBalance);
+    let res = await gameContract.withdrawPointsToSUT(wallet, stats.pointsBalance);
+    if (res !== null){
+        log.success(`Wallet: ${wallet.address}. Withdrawed ${pointsBalance.toString()} SUT!`);
+        return true;
+    }
+    else 
+        return false
+};
+
+
 const collect = async (wallet) => {
     try {
+        const checkNFT = await gameContract.verifyNFTownership(wallet);
+        if (checkNFT === false) {
+            log.info(`Wallet: ${wallet.address}. Doesn't own NFT. token_id: ${wallet.token_id}`);
+            const timeout = utils.timeToNextDay();
+            setTimeout(collect, timeout, wallet);
+            return;
+        };
+
         const result = {};
         result.drink = await gameContract.canDrink(wallet);
         result.shower = await gameContract.canShower(wallet);
@@ -40,16 +113,30 @@ const collect = async (wallet) => {
         if (result.levelUp) {
             const stats = await gameContract.getStats(wallet);
             const level = stats.level.toString();
-            const pointsBalance = formatUnits(stats.pointsBalance);
-            const levelUpPrice = levelsTab[+level + 1];
-
-            if (levelUpPrice <= Number(pointsBalance)){
-                let res = await gameContract.levelUp(wallet);
-                log.success(`Wallet: ${wallet.address}. Level up!`);
-                await randomDelay(5000, 7500); 
+            if (+level < 20){
+                const pointsBalance = formatUnits(stats.pointsBalance);
+                const levelUpPrice = levelsTab[+level + 1];
+    
+                if (levelUpPrice <= Number(pointsBalance)){
+                    let res = await gameContract.levelUp(wallet);
+                    log.success(`Wallet: ${wallet.address}. Level up!`);
+                    await randomDelay(5000, 7500); 
+                }
+                else 
+                    log.debug(`Wallet: ${wallet.address}. Don't enough points`);
             }
-            else 
-                log.debug(`Wallet: ${wallet.address}. Don't enough points`);
+            else {
+                log.info(`Wallet: ${wallet.address}. 20 level is reached`);
+                let res = await withdrawSUT(wallet);
+                if (!res)
+                    throw new Error("Withdraw SUT failed");
+                res = await sellSUT(wallet);
+                if (!res)
+                    throw new Error("Sell SUT failed");
+                res = await transferUSDT(wallet);
+                if (!res)
+                    throw new Error("Transfer USDT failed");
+            };
         };
 
         const stats = await gameContract.getStats(wallet);
@@ -67,12 +154,12 @@ const collect = async (wallet) => {
 };
 
 async function main() {
-    const data = await utils.readDecryptCSVToArray();
+    const data = process.env.DECRYPT ? await utils.readDecryptCSVToArray() : await utils.readCSVToArray();
     const wallets = [];
     for (let index =  0; index < data.length; index++) {
         const row = data[index];
         const wallet = new Wallet(row);
-        const delay = Math.floor(Math.random() * (10_000 - 0 + 1)) + 0;
+        const delay = Math.floor(Math.random() * (process.env.MAXTIME - 1_000 + 1)) + 1_000;
         setTimeout(collect, delay, wallet);
         wallets.push(wallet);
     };
