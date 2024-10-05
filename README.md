@@ -81,4 +81,4 @@ Fill out the ```w.csv``` file with the wallets to be used for token transfers. T
 
 ## License
 
-Project **brodev3**/NFPromt-Daily distributed under the MIT license.
+Project **brodev3**/MORCHI-Daily distributed under the MIT license.
