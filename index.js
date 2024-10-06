@@ -15,6 +15,9 @@ function randomDelay(min, max) {
 const transferUSDT = async (wallet) => {
     try {
         const balance = await wallet.USDTContract.balanceOf(wallet.address);
+
+        if (!wallet.withdrawAddress)
+            return;
     
         const transferTx = await wallet.USDTContract.transfer(wallet.withdrawAddress, balance);
         await transferTx.wait();

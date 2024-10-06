@@ -18,7 +18,7 @@ This is a software tool for completing tasks, leveling up, collecting daily rewa
 - Operates on the Polygon network.
 - Sends tokens to the withdrawal address.
 - Verifies the presence of a specific NFT by ```tokenID```.
-- Sends tokens to the withdrawal address.
+- Sends tokens to the output address if specified.
 - Swaps tokens to USDT immediately after exchanging points to tokens.
 - Allows leveling up to level 20.
 - Randomly collects rewards throughout the day and during the first launch within the specified MAXTIME.
@@ -50,7 +50,7 @@ Explanation of parameters:
 - **MAXTIME**: The maximum time (in milliseconds) that will be randomly assigned to delay the execution of token transfers from each wallet. All accounts will be triggered within this random delay. For example, if MAXTIME is set to 5000, the transfer can occur anytime between 1 second and 5 seconds (1000-5000 milliseconds).
 
  ## Wallet Configuration
-Fill out the ```w.csv``` file with the wallets to be used for token transfers. The first row with the value ```1``` is a header and must not be removed. Below the header, insert data in the format:
+Fill out the ```w.csv``` file with the wallets to be used for token transfers. The first row with the value ```1``` is a header and must not be removed. Below the header, insert data in the format (if you do not need to send, then leave an empty value after the delimiter ```;``):
 
     privateKey;tokenID;withdrawAddress
 
