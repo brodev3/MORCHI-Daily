@@ -116,8 +116,8 @@ const collect = async (wallet) => {
         if (result.levelUp) {
             const stats = await gameContract.getStats(wallet);
             const level = stats.level.toString();
+            const pointsBalance = formatUnits(stats.pointsBalance);
             if (+level < 20){
-                const pointsBalance = formatUnits(stats.pointsBalance);
                 const levelUpPrice = levelsTab[+level + 1];
     
                 if (levelUpPrice <= Number(pointsBalance)){
@@ -130,7 +130,6 @@ const collect = async (wallet) => {
             }
             else {
                 log.info(`Wallet: ${wallet.address}. 20 level is reached`);
-                const pointsBalance = formatUnits(stats.pointsBalance);
                 if (Number(pointsBalance) > 0){
                     let res = await withdrawSUT(wallet);
                     if (!res)
