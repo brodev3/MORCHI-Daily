@@ -61,7 +61,7 @@ const sellSUT = async (wallet) => {
         log.success(`Wallet: ${wallet.address}. Swaped ${formatUnits(balance)} SUT to USDT!`);
         return true;
     } catch (error) {
-        log.error(`Wallet: ${wallet.address}. sellSUT. Error message: ${err.message}\nStack: ${err.stack}`);
+        log.error(`Wallet: ${wallet.address}. sellSUT. Error message: ${error.message}\nStack: ${error.stack}`);
         return null;
     };
 };
@@ -126,19 +126,24 @@ const collect = async (wallet) => {
                     await randomDelay(5000, 7500); 
                 }
                 else 
-                    log.debug(`Wallet: ${wallet.address}. Don't enough points`);
+                    log.info(`Wallet: ${wallet.address}. Don't enough points`);
             }
             else {
                 log.info(`Wallet: ${wallet.address}. 20 level is reached`);
-                let res = await withdrawSUT(wallet);
-                if (!res)
-                    throw new Error("Withdraw SUT failed");
-                res = await sellSUT(wallet);
-                if (!res)
-                    throw new Error("Sell SUT failed");
-                res = await transferUSDT(wallet);
-                if (!res)
-                    throw new Error("Transfer USDT failed");
+                const pointsBalance = formatUnits(stats.pointsBalance);
+                if (Number(pointsBalance) > 0){
+                    let res = await withdrawSUT(wallet);
+                    if (!res)
+                        throw new Error("Withdraw SUT failed");
+                    res = await sellSUT(wallet);
+                    if (!res)
+                        throw new Error("Sell SUT failed");
+                    res = await transferUSDT(wallet);
+                    if (!res)
+                        throw new Error("Transfer USDT failed");
+                }
+                else 
+                    log.info(`Wallet: ${wallet.address}. Don't enough points`);
             };
         };
 
