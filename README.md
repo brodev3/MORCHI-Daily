@@ -47,7 +47,7 @@ Explanation of parameters:
 - **USDTCONTRACT**: USDT contract address.
 - **ROUTERCONTRACT**: The DOOAR contract address.
 - **GMTCONTRACT**: GMT contract address.
-- **MAXTIME**: The maximum time (in milliseconds) that will be randomly assigned to delay the execution of token transfers from each wallet. All accounts will be triggered within this random delay. For example, if MAXTIME is set to 5000, the transfer can occur anytime between 1 second and 5 seconds (1000-5000 milliseconds).
+- **MAXTIME**: The maximum time (in milliseconds) that will be randomly assigned to delay the execution of start each wallet. All accounts will be triggered within this random delay. For example, if MAXTIME is set to 5000, the start can occur anytime between 1 second and 5 seconds (1000-5000 milliseconds).
 
  ## Wallet Configuration
 Fill out the ```w.csv``` file with the wallets to be used for token transfers. The first row with the value ```1``` is a header and must not be removed. Below the header, insert data in the format (if you do not need to send, then leave an empty value after the delimiter ```;``):
