@@ -13,7 +13,7 @@ class MorchiGame {
             else 
                 return false;
         } catch (err) {
-            log.error(`MorchiGame Contract, call getStats. Error message: ${err.message}\nStack: ${err.stack}`);
+            log.errorDB(wallet, "verifyNFTownership", err.message, err.stack);
             return null;
         };
     };
@@ -23,7 +23,7 @@ class MorchiGame {
             const canDrink = await wallet.gameContract.morchiStates(wallet.token_id);
             return canDrink;
         } catch (err) {
-            log.error(`MorchiGame Contract, call getStats. Error message: ${err.message}\nStack: ${err.stack}`);
+            log.errorDB(wallet, "getStats", err.message, err.stack);
             return null;
         };
     };
@@ -33,7 +33,7 @@ class MorchiGame {
             const canDrink = await wallet.gameContract.canDrink(wallet.token_id);
             return canDrink;
         } catch (err) {
-            log.error(`MorchiGame Contract, call canDrink. Error message: ${err.message}\nStack: ${err.stack}`);
+            log.errorDB(wallet, "canDrink", err.message, err.stack);
             return null;
         };
     };
@@ -43,7 +43,7 @@ class MorchiGame {
             const canShower = await wallet.gameContract.canShower(wallet.token_id);
             return canShower;
         } catch (err) {
-            log.error(`MorchiGame Contract, call canShower. Error message: ${err.message}\nStack: ${err.stack}`);
+            log.errorDB(wallet, "canShower", err.message, err.stack);
             return null;
         };
     };
@@ -53,7 +53,7 @@ class MorchiGame {
             const canWorkOut = await wallet.gameContract.canWorkOut(wallet.token_id);
             return canWorkOut;
         } catch (err) {
-            log.error(`MorchiGame Contract, call canWorkOut. Error message: ${err.message}\nStack: ${err.stack}`);
+            log.errorDB(wallet, "canWorkOut", err.message, err.stack);
             return null;
         };
     };
@@ -63,7 +63,7 @@ class MorchiGame {
             const canLevelUp = await wallet.gameContract.canLevelUp(wallet.token_id);
             return canLevelUp;
         } catch (err) {
-            log.error(`MorchiGame Contract, call canLevelUp. Error message: ${err.message}\nStack: ${err.stack}`);
+            log.errorDB(wallet, "canLevelUp", err.message, err.stack);
             return null;
         };
     };
@@ -74,10 +74,7 @@ class MorchiGame {
             await tx.wait();
             return tx;
         } catch (err) {
-            log.error(
-                `MorchiGame Contract, call chugEnergyDrink. Error message: ${err.message}\nStack: ${err.stack}
-                Transaction: ${err.transaction}\nTransactionHash: ${err.transactionHash}\nTransactionHash: ${err.receipt}`
-            );
+            log.errorDB(wallet, "chugEnergyDrink", JSON.stringify(err), err.stack);
             return null;
         };
     };
@@ -88,10 +85,7 @@ class MorchiGame {
             await tx.wait();
             return tx;
         } catch (err) {
-            log.error(
-                `MorchiGame Contract, call haveAColdShower. Error message: ${err.message}\nStack: ${err.stack}
-                Transaction: ${err.transaction}\nTransactionHash: ${err.transactionHash}\nTransactionHash: ${err.receipt}`
-            );
+            log.errorDB(wallet, "haveAColdShower", JSON.stringify(err), err.stack);
             return null;
         };
     };
@@ -102,10 +96,7 @@ class MorchiGame {
             await tx.wait();
             return tx;
         } catch (err) {
-            log.error(
-                `MorchiGame Contract, call grindAtTheGym. Error message: ${err.message}\nStack: ${err.stack}
-                Transaction: ${err.transaction}\nTransactionHash: ${err.transactionHash}\nTransactionHash: ${err.receipt}`
-            );
+            log.errorDB(wallet, "grindAtTheGym", JSON.stringify(err), err.stack);
             return null;
         };
     };
@@ -116,10 +107,7 @@ class MorchiGame {
             await tx.wait();
             return tx;
         } catch (err) {
-            log.error(
-                `MorchiGame Contract, call levelUp. Error message: ${err.message}\nStack: ${err.stack}
-                Transaction: ${err.transaction}\nTransactionHash: ${err.transactionHash}\nTransactionHash: ${err.receipt}`
-            );
+            log.errorDB(wallet, "levelUp", JSON.stringify(err), err.stack);
             return null;
         };
     };
@@ -130,10 +118,7 @@ class MorchiGame {
             await tx.wait();
             return tx;
         } catch (err) {
-            log.error(
-                `MorchiGame Contract, call withdrawPointsToSUT. Error message: ${err.message}\nStack: ${err.stack}
-                Transaction: ${err.transaction}\nTransactionHash: ${err.transactionHash}\nTransactionHash: ${err.receipt}`
-            );
+            log.errorDB(wallet, "withdrawPointsToSUT", JSON.stringify(err), err.stack);
             return null;
         };
     };

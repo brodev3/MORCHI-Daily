@@ -5,9 +5,9 @@ const gameABI = require('../ABI/GAME.json');
 const nftABI = require('../ABI/NFT-ERC-721.json');
 const routerABI = require('../ABI/ROUTER.json');
 const erc20ABI = require('../ABI/ERC-20.json');
-require('dotenv').config();
+const config = require("../input/config");
 
-const provider = new ethers.JsonRpcProvider(process.env.POLYGON_RPC_URL);
+const provider = new ethers.JsonRpcProvider(config.POLYGON_RPC_URL);
 
 class Wallet {
 
@@ -19,15 +19,12 @@ class Wallet {
 
         this.polygon = new ethers.Wallet(this.privateKey, provider);
         this.address = this.polygon.address;
-        this.gameContract = new ethers.Contract(process.env.CONTRACT, gameABI, this.polygon);
-        this.NFTContract = new ethers.Contract(process.env.NFTCONTRACT, nftABI, this.polygon);
-        this.routerContract = new ethers.Contract(process.env.ROUTERCONTRACT, routerABI, this.polygon);
-        this.SUTContract = new ethers.Contract(process.env.SUTCONTRACT, erc20ABI, this.polygon);
-        this.USDTContract = new ethers.Contract(process.env.USDTCONTRACT, erc20ABI, this.polygon);
-
-
+        this.gameContract = new ethers.Contract(config.contract, gameABI, this.polygon);
+        this.NFTContract = new ethers.Contract(config.NFTCONTRACT, nftABI, this.polygon);
+        this.routerContract = new ethers.Contract(config.ROUTERCONTRACT, routerABI, this.polygon);
+        this.SUTContract = new ethers.Contract(config.SUTCONTRACT, erc20ABI, this.polygon);
+        this.USDTContract = new ethers.Contract(config.USDTCONTRACT, erc20ABI, this.polygon);
     };
-
 };
 
 
