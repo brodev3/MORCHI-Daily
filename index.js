@@ -41,14 +41,14 @@ const transferUSDT = async (wallet) => {
 const sellSUT = async (wallet) => {
     try {
         const balance = await wallet.SUTContract.balanceOf(wallet.address);
-        const allowance = await wallet.SUTContract.allowance(wallet.address, process.env.ROUTERCONTRACT);
+        const allowance = await wallet.SUTContract.allowance(wallet.address, config.ROUTERCONTRACT);
 
         if (allowance.toString() !== MAX_UINT256.toString()) {
-            const approveTx = await wallet.SUTContract.approve(process.env.ROUTERCONTRACT, MAX_UINT256);
+            const approveTx = await wallet.SUTContract.approve(config.ROUTERCONTRACT, MAX_UINT256);
             await approveTx.wait();
         };
     
-        const path = [process.env.SUTCONTRACT, process.env.GMTCONTRACT, process.env.USDTCONTRACT];
+        const path = [config.SUTCONTRACT, config.GMTCONTRACT, config.USDTCONTRACT];
     
         const deadline = Math.floor(Date.now() / 1000) + 60 * 20;
         const amountsOut = await wallet.routerContract.getAmountsOut(balance, path);
