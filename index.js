@@ -20,56 +20,76 @@ function randomValueDelay(min, max) {
 };
 
 const transferUSDT = async (wallet) => {
-    try {
-        const balance = await wallet.USDTContract.balanceOf(wallet.address);
-
-        if (!wallet.withdrawAddress)
-            return;
+    let attempts = 0;
+    let maxAttempts = 5;
+    let delay = 10_000; 
     
-        const transferTx = await wallet.USDTContract.transfer(wallet.withdrawAddress, balance);
-        await transferTx.wait();
+    while (attempts < maxAttempts) {
+        try {
+            const balance = await wallet.USDTContract.balanceOf(wallet.address);
+            
+            if (!wallet.withdrawAddress) return;
 
-        const wei = parseUnits(balance.toString(), "szabo");
-        log.successDB(wallet, "transferUSDT", `Transfered ${formatUnits(wei)} USDT to ${wallet.withdrawAddress}!`);
-        return true;
-    } catch (error) {
-        await log.errorDB(wallet, "transferUSDT", err.message, err.stack);
-        return null;
+            const transferTx = await wallet.USDTContract.transfer(wallet.withdrawAddress, balance);
+            await transferTx.wait();
+
+            const wei = parseUnits(balance.toString(), "szabo");
+            log.successDB(wallet, "transferUSDT", `Transfered ${formatUnits(wei)} USDT to ${wallet.withdrawAddress}!`);
+            return true;
+        } catch (error) {
+            attempts++;
+            await log.errorDB(wallet, "transferUSDT", `Attempts ${attempts}: ` + error.message, error.stack);
+
+            if (attempts >= maxAttempts) return null;
+
+            await new Promise(resolve => setTimeout(resolve, delay));
+            delay *= 2; 
+        };
     };
 };
 
 const sellSUT = async (wallet) => {
-    try {
-        const balance = await wallet.SUTContract.balanceOf(wallet.address);
-        const allowance = await wallet.SUTContract.allowance(wallet.address, config.ROUTERCONTRACT);
+    let attempts = 0;
+    let maxAttempts = 5;
+    let delay = 1000; 
+    
+    while (attempts < maxAttempts) {
+        try {
+            const balance = await wallet.SUTContract.balanceOf(wallet.address);
+            const allowance = await wallet.SUTContract.allowance(wallet.address, config.ROUTERCONTRACT);
 
-        if (allowance.toString() !== MAX_UINT256.toString()) {
-            const approveTx = await wallet.SUTContract.approve(config.ROUTERCONTRACT, MAX_UINT256);
-            await approveTx.wait();
+            if (allowance.toString() !== MAX_UINT256.toString()) {
+                const approveTx = await wallet.SUTContract.approve(config.ROUTERCONTRACT, MAX_UINT256);
+                await approveTx.wait();
+            };
+
+            const path = [config.SUTCONTRACT, config.GMTCONTRACT, config.USDTCONTRACT];
+            const deadline = Math.floor(Date.now() / 1000) + 60 * 20;
+            const amountsOut = await wallet.routerContract.getAmountsOut(balance, path);
+            const amountOutEstimated = amountsOut[2];
+
+            const amountOutMin = amountOutEstimated / 100n * 93n;
+
+            const swapTx = await wallet.routerContract.swapExactTokensForTokens(
+                balance,
+                amountOutMin,
+                path,
+                wallet.address,
+                deadline
+            );
+
+            await swapTx.wait();
+            log.successDB(wallet, "sellSUT", `Swapped ${formatUnits(balance)} SUT to USDT!`);
+            return true;
+        } catch (error) {
+            attempts++;
+            await log.errorDB(wallet, "sellSUT", `Attempts ${attempts}: ` + error.message, error.stack);
+
+            if (attempts >= maxAttempts) return null;
+
+            await new Promise(resolve => setTimeout(resolve, delay));
+            delay *= 2; 
         };
-    
-        const path = [config.SUTCONTRACT, config.GMTCONTRACT, config.USDTCONTRACT];
-    
-        const deadline = Math.floor(Date.now() / 1000) + 60 * 20;
-        const amountsOut = await wallet.routerContract.getAmountsOut(balance, path);
-        const amountOutEstimated = amountsOut[2];
-    
-        const amountOutMin = amountOutEstimated / 100n * 93n;
-    
-        const swapTx = await wallet.routerContract.swapExactTokensForTokens(
-            balance,
-            amountOutMin,
-            path,
-            wallet.address,
-            deadline
-        );
-    
-        await swapTx.wait();
-        log.successDB(wallet, "sellSUT", `Swaped ${formatUnits(balance)} SUT to USDT!`);
-        return true;
-    } catch (error) {
-        await log.errorDB(wallet, "sellSUT", error.message, error.stack);
-        return null;
     };
 };
 

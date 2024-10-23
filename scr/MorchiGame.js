@@ -74,52 +74,96 @@ class MorchiGame {
             await tx.wait();
             return tx;
         } catch (err) {
-            log.errorDB(wallet, "chugEnergyDrink", JSON.stringify(err), err.stack);
+            log.errorDB(wallet, "chugEnergyDrink",  `Attempts ${attempts}: ` +  JSON.stringify(err), err.stack);
             return null;
         };
     };
 
     async shower(wallet) {
-        try {
-            const tx = await wallet.gameContract.haveAColdShower(wallet.token_id);
-            await tx.wait();
-            return tx;
-        } catch (err) {
-            log.errorDB(wallet, "haveAColdShower", JSON.stringify(err), err.stack);
-            return null;
+        let attempts = 0;
+        let maxAttempts = 5; 
+        let delay = 10_000; 
+        
+        while (attempts < maxAttempts) {
+            try {
+                const tx = await wallet.gameContract.haveAColdShower(wallet.token_id);
+                const receipt = await tx.wait();
+                return tx; 
+            } catch (err) {
+                attempts++;
+                await log.errorDB(wallet, "haveAColdShower", `Attempts ${attempts}: ` +  JSON.stringify(err), err.stack);
+
+                if (attempts >= maxAttempts) return null;
+                
+                await new Promise(resolve => setTimeout(resolve, delay));
+                delay *= 2;
+            };
         };
     };
 
     async workOut(wallet) {
-        try {
-            const tx = await wallet.gameContract.grindAtTheGym(wallet.token_id);
-            await tx.wait();
-            return tx;
-        } catch (err) {
-            log.errorDB(wallet, "grindAtTheGym", JSON.stringify(err), err.stack);
-            return null;
+        let attempts = 0;
+        let maxAttempts = 5; 
+        let delay = 10_000; 
+        
+        while (attempts < maxAttempts) {
+            try {
+                const tx = await wallet.gameContract.grindAtTheGym(wallet.token_id);
+                await tx.wait();
+                return tx;
+            } catch (err) {
+                attempts++;
+                await log.errorDB(wallet, "grindAtTheGym", `Attempts ${attempts}: ` +  JSON.stringify(err), err.stack);
+
+                if (attempts >= maxAttempts) return null;
+                
+                await new Promise(resolve => setTimeout(resolve, delay));
+                delay *= 2;
+            };
         };
     };
 
     async levelUp(wallet) {
-        try {
-            const tx = await wallet.gameContract.levelUp(wallet.token_id);
-            await tx.wait();
-            return tx;
-        } catch (err) {
-            log.errorDB(wallet, "levelUp", JSON.stringify(err), err.stack);
-            return null;
+        let attempts = 0;
+        let maxAttempts = 5; 
+        let delay = 10_000; 
+        
+        while (attempts < maxAttempts) {
+            try {
+                const tx = await wallet.gameContract.levelUp(wallet.token_id);
+                await tx.wait();
+                return tx;
+            } catch (err) {
+                attempts++;
+                await log.errorDB(wallet, "levelUp", `Attempts ${attempts}: ` +  JSON.stringify(err), err.stack);
+
+                if (attempts >= maxAttempts) return null;
+                
+                await new Promise(resolve => setTimeout(resolve, delay));
+                delay *= 2;
+            };
         };
     };
 
     async withdrawPointsToSUT(wallet, points) {
-        try {
-            const tx = await wallet.gameContract.withdrawPointsToSUT(wallet.token_id, points);
-            await tx.wait();
-            return tx;
-        } catch (err) {
-            log.errorDB(wallet, "withdrawPointsToSUT", JSON.stringify(err), err.stack);
-            return null;
+        let attempts = 0;
+        let maxAttempts = 5; 
+        let delay = 10_000; 
+        
+        while (attempts < maxAttempts) {
+            try {
+                const tx = await wallet.gameContract.withdrawPointsToSUT(wallet.token_id, points);
+                await tx.wait();
+                return tx;
+            } catch (err) {
+                attempts++;
+                await log.errorDB(wallet, "withdrawPointsToSUT", `Attempts ${attempts}: ` +  JSON.stringify(err), err.stack);
+
+                if (attempts >= maxAttempts) return null;
+                
+                await new Promise(resolve => setTimeout(resolve, delay));
+                delay *= 2;
+            };
         };
     };
 
